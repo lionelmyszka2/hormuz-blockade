@@ -280,8 +280,11 @@
     font-weight: 800;
     color: var(--print);
     letter-spacing: 1px;
-    width: 44px;
+    white-space: nowrap;
     text-align: right;
+    /* Fixed min-width keeps the three labels' right edges flush so the
+       buttons (TIME / GAME A / GAME B) sit on the same vertical axis. */
+    min-width: 50px;
   }
 
   /* Small oval/pill burgundy buttons (TIME / GAME A / GAME B) */
@@ -403,26 +406,48 @@
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(6, 1fr);
     gap: 0;
+    /* Reserve the leftmost 22% of the LCD for the U.A.E. peninsula — no boats
+       or destroyer render there, only the silk-screen land remains visible. */
+    padding-left: 22%;
   }
 
-  /* Strait shores (left & right) */
-  .play-area::before, .play-area::after {
+  /* Silk-screened map of the Strait of Hormuz — fixed colored decoration
+     painted on the LCD glass, like vintage G&W games (Green House, Octopus). */
+  .map-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* Make the imported PNG read as a vintage silk-screen print on glass:
+     multiply blends with the LCD base, heavily desaturated and faded so the
+     map looks printed UNDER the glass rather than digitally pasted on top. */
+  .map-bg image {
+    mix-blend-mode: multiply;
+    filter: contrast(1.04) saturate(0.55) brightness(1.02);
+    opacity: 0.62;
+  }
+  .play-area > .cell { z-index: 1; }
+
+  /* Subtle LCD glass reflection on top of the map — soft highlight along
+     the upper edge, slight darkening at the bottom, so the printed map
+     feels like it's behind a piece of slightly tinted glass. */
+  .play-area::after {
     content: '';
     position: absolute;
-    top: 0; bottom: 0;
-    width: 12px;
-    background-image:
-      repeating-linear-gradient(
-        45deg,
-        rgba(26,26,26,0.55) 0,
-        rgba(26,26,26,0.55) 3px,
-        transparent 3px,
-        transparent 6px
-      );
-    border: 1px solid rgba(26,26,26,0.5);
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      linear-gradient(180deg,
+        rgba(255,255,255,0.10) 0%,
+        rgba(255,255,255,0.04) 18%,
+        transparent           45%,
+        transparent           70%,
+        rgba(0,0,0,0.04)      100%);
   }
-  .play-area::before { left: -6px; }
-  .play-area::after  { right: -6px; }
 
   .cell {
     position: relative;
@@ -469,32 +494,61 @@
   .speedboat .wake  { bottom: 0; left: 20%; width: 60%; height: 8%; clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%); }
 
   /* Shahed drone */
+  /* Shahed drone — nose pointing DOWN (toward the destroyer) */
   .shahed { width: 50px; height: 30px; position: relative; }
   .shahed > * { position: absolute; background: var(--lcd-on); }
-  .shahed .body { top: 38%; left: 40%; width: 20%; height: 50%; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-  .shahed .wing { top: 50%; left: 8%; width: 84%; height: 24%; clip-path: polygon(0 100%, 50% 0, 100% 100%); }
-  .shahed .tail { top: 80%; left: 30%; width: 40%; height: 15%; }
-  .shahed .prop { top: 90%; left: 46%; width: 8%; height: 10%; }
+  .shahed .prop { top: 0%; left: 46%; width: 8%; height: 8%; }
+  .shahed .tail { top: 6%; left: 30%; width: 40%; height: 12%; }
+  .shahed .wing { top: 22%; left: 8%; width: 84%; height: 30%; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+  .shahed .body { top: 12%; left: 40%; width: 20%; height: 50%; clip-path: polygon(0 0, 100% 0, 50% 100%); }
 
   /* Cruise missile */
-  .missile { width: 56px; height: 20px; position: relative; }
+  /* Long-range missile — vertical, nose pointing DOWN, exhaust at the top */
+  .missile { width: 18px; height: 50px; position: relative; }
   .missile > * { position: absolute; background: var(--lcd-on); }
-  .missile .body { top: 35%; left: 0; width: 80%; height: 30%; }
-  .missile .nose { top: 30%; left: 75%; width: 20%; height: 40%; clip-path: polygon(0 0, 100% 50%, 0 100%); }
-  .missile .fin1 { top: 12%; left: 4%; width: 16%; height: 25%; clip-path: polygon(0 100%, 100% 100%, 100% 0); }
-  .missile .fin2 { top: 63%; left: 4%; width: 16%; height: 25%; clip-path: polygon(0 0, 100% 100%, 100% 0); }
-  .missile .flame { top: 38%; left: -22%; width: 22%; height: 24%; clip-path: polygon(0 50%, 100% 0, 80% 50%, 100% 100%); }
+  .missile .flame {
+    top: -18%; left: 33%; width: 34%; height: 22%;
+    clip-path: polygon(50% 100%, 0 0, 30% 50%, 50% 0, 70% 50%, 100% 0);
+  }
+  .missile .fin1 {
+    top: 8%; left: 0; width: 26%; height: 18%;
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  }
+  .missile .fin2 {
+    top: 8%; right: 0; width: 26%; height: 18%;
+    clip-path: polygon(0 0, 100% 100%, 0 100%);
+  }
+  .missile .body {
+    top: 0; left: 35%; width: 30%; height: 78%;
+  }
+  .missile .nose {
+    top: 72%; left: 30%; width: 40%; height: 28%;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
 
-  .bullet { width: 8px; height: 16px; background: var(--lcd-on); border-radius: 2px; }
+  /* Player CIWS round — thin missile, pointed nose UP toward the threats */
+  .bullet {
+    width: 5px; height: 16px;
+    background: var(--lcd-on);
+    clip-path: polygon(50% 0, 100% 28%, 100% 80%, 80% 100%, 60% 82%, 50% 100%, 40% 82%, 20% 100%, 0 80%, 0 28%);
+  }
 
+  /* Hit explosion — finer, silk-screen starburst rather than a heavy blob */
   .splash {
-    width: 60%; height: 60%;
+    width: 70%; height: 70%;
     background:
-      radial-gradient(circle, var(--lcd-on) 22%, transparent 26%),
-      radial-gradient(circle at 30% 30%, var(--lcd-on) 9%, transparent 11%),
-      radial-gradient(circle at 70% 30%, var(--lcd-on) 9%, transparent 11%),
-      radial-gradient(circle at 30% 70%, var(--lcd-on) 9%, transparent 11%),
-      radial-gradient(circle at 70% 70%, var(--lcd-on) 9%, transparent 11%);
+      /* small central core */
+      radial-gradient(circle, var(--lcd-on) 7%, transparent 9%),
+      /* four cardinal sparks */
+      radial-gradient(circle at 50% 8%,  var(--lcd-on) 3.5%, transparent 5%),
+      radial-gradient(circle at 50% 92%, var(--lcd-on) 3.5%, transparent 5%),
+      radial-gradient(circle at 8%  50%, var(--lcd-on) 3.5%, transparent 5%),
+      radial-gradient(circle at 92% 50%, var(--lcd-on) 3.5%, transparent 5%),
+      /* four diagonal smaller sparks */
+      radial-gradient(circle at 22% 22%, var(--lcd-on) 2.5%, transparent 4%),
+      radial-gradient(circle at 78% 22%, var(--lcd-on) 2.5%, transparent 4%),
+      radial-gradient(circle at 22% 78%, var(--lcd-on) 2.5%, transparent 4%),
+      radial-gradient(circle at 78% 78%, var(--lcd-on) 2.5%, transparent 4%);
   }
 
   .banner {
@@ -514,6 +568,45 @@
   .banner.show { display: flex; }
   .banner h2 { font-size: 22px; letter-spacing: 4px; }
   .banner p  { font-size: 12px; letter-spacing: 2px; }
+
+  /* Angry Trump on Game Over — shows the reference pixel-art directly,
+     rendered with crisp pixel sampling so the LCD look is preserved.
+     Animated with a fast 2-step shake to convey rage. */
+  .banner-trump {
+    width: 130px;
+    height: auto;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor;
+    animation: trumpRage 0.22s steps(2) infinite;
+    transform-origin: 50% 90%;
+  }
+  .banner-trump.fallback {
+    /* Visible fallback box if assets/trump-angry.png is not yet saved */
+    width: 160px;
+    height: 120px;
+    border: 2px dashed rgba(0,0,0,0.4);
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(0,0,0,0.05) 0 8px,
+      transparent 8px 16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(0,0,0,0.55);
+    font-size: 10px;
+    line-height: 1.3;
+    text-align: center;
+    padding: 8px;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    animation: none;
+  }
+
+  @keyframes trumpRage {
+    0%, 100% { transform: translate(-2px, 0) rotate(-1.5deg); }
+    50%      { transform: translate( 2px,-1px) rotate(1.5deg); }
+  }
 
   .start-prompt {
     position: absolute;
@@ -614,7 +707,7 @@
            onerror="this.outerHTML='&lt;div class=\'sticker missing\'&gt;Place&lt;br&gt;eagle.png&lt;br&gt;in /assets&lt;/div&gt;'">
     </div>
     <div class="side-btn-wrap left-btn-wrap">
-      <button class="bigbtn" id="btnLeft" aria-label="Gauche"></button>
+      <button class="bigbtn" id="btnLeft" aria-label="Left"></button>
       <div class="big-label">◀ LEFT</div>
     </div>
   </div>
@@ -636,7 +729,7 @@
               <div>SCORE</div>
               <div id="score">000</div>
             </div>
-            <div class="center" id="alert">U.S. NAVY<br>DETROIT D'ORMUZ</div>
+            <div class="center" id="alert">U.S. NAVY<br>STRAIT OF HORMUZ</div>
             <div class="right">
               <div>MISS</div>
               <div class="miss-row">
@@ -647,9 +740,35 @@
             </div>
           </div>
 
-          <div class="play-area" id="playArea"></div>
+          <div class="play-area" id="playArea">
+            <!-- Strait of Hormuz map — user-drawn silk-screen layer painted on the LCD.
+                 The PNG fills the play-area and acts as the fixed colour decoration,
+                 just like the printed artwork on a real Game &amp; Watch screen. -->
+            <svg class="map-bg" viewBox="0 0 320 200" preserveAspectRatio="none"
+                 xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <image href="assets/Hormuz-map.png" xlink:href="assets/Hormuz-map.png"
+                     x="0" y="0" width="320" height="200"
+                     preserveAspectRatio="none"/>
+
+              <!-- Country labels (printed on top) -->
+              <text x="298" y="18" font-family="Helvetica, Arial, sans-serif"
+                    font-size="9" font-weight="800"
+                    fill="#3a2510" letter-spacing="1" text-anchor="end"
+                    style="mix-blend-mode: multiply;">IRAN</text>
+              <text x="14" y="195" font-family="Helvetica, Arial, sans-serif"
+                    font-size="8" font-weight="800"
+                    fill="#3a2510" letter-spacing="0.8"
+                    style="mix-blend-mode: multiply;">U.A.E.</text>
+            </svg>
+          </div>
 
           <div class="banner" id="banner">
+            <!-- Angry Trump shows the user's pixel-art reference directly,
+                 rendered with nearest-neighbor sampling so every pixel stays
+                 sharp. If the asset is missing, an inline fallback notice
+                 tells the user where to drop the file. -->
+            <img class="banner-trump" src="assets/trump-angry.png" alt=""
+                 onerror="this.outerHTML='&lt;div class=&quot;banner-trump fallback&quot;&gt;Save the angry-Trump pixel art as&lt;br&gt;assets/trump-angry.png&lt;/div&gt;'">
             <h2 id="bannerTitle">GAME OVER</h2>
             <p id="bannerSub">PRESS GAME A</p>
           </div>
@@ -695,11 +814,11 @@
     </div>
     <div class="side-btn-wrap right-btn-wrap">
       <div class="stacked-btn">
-        <button class="bigbtn fire" id="btnFire" aria-label="Tirer"></button>
-        <div class="big-label">▲ FIRE</div>
+        <button class="bigbtn fire" id="btnFire" aria-label="Fire"></button>
+        <div class="big-label">FIRE</div>
       </div>
       <div class="stacked-btn">
-        <button class="bigbtn" id="btnRight" aria-label="Droite"></button>
+        <button class="bigbtn" id="btnRight" aria-label="Right"></button>
         <div class="big-label">RIGHT ▶</div>
       </div>
     </div>
@@ -720,9 +839,9 @@
   const FIRE_COOLDOWN_MS = 220;
 
   const TYPES = {
-    BOAT:    { id: 'BOAT',    label: 'Vedette',          speed: 0.65, points: 10, render: 'speedboat' },
-    SHAHED:  { id: 'SHAHED',  label: 'Drone Shahed',     speed: 0.35, points: 20, render: 'shahed'    },
-    MISSILE: { id: 'MISSILE', label: 'Missile longue P.', speed: 0.95, points: 30, render: 'missile' },
+    BOAT:    { id: 'BOAT',    label: 'Speedboat',      speed: 0.65, points: 10, render: 'speedboat' },
+    SHAHED:  { id: 'SHAHED',  label: 'Shahed Drone',   speed: 0.35, points: 20, render: 'shahed'    },
+    MISSILE: { id: 'MISSILE', label: 'Cruise Missile', speed: 0.95, points: 30, render: 'missile' },
   };
   const MAX_ON_SCREEN = 3;
 
@@ -862,14 +981,28 @@
 
   function spawn() {
     if (state.threats.length >= MAX_ON_SCREEN) return;
-    const lane = Math.floor(Math.random() * LANES);
-    if (state.threats.some(t => t.lane === lane && t.row < 2)) return;
     const r = Math.random();
     let type;
     if (state.score < 30)       type = r < 0.7 ? 'BOAT' : (r < 0.9 ? 'SHAHED' : 'MISSILE');
     else if (state.score < 100) type = r < 0.5 ? 'BOAT' : (r < 0.85 ? 'SHAHED' : 'MISSILE');
     else                        type = r < 0.35 ? 'BOAT' : (r < 0.7 ? 'SHAHED' : 'MISSILE');
-    state.threats.push({ id: state.nextId++, type, lane, row: 0, progress: 0 });
+
+    // Spawn origin matches the silk-screened Hormuz map:
+    //  • Missiles & Shahed drones launch from Iranian land (top-right block) →
+    //      lanes 1 or 2, row 0 (where Iran is painted on the LCD).
+    //  • Boats sail in from the strait — top-left water only → lane 0, row 0.
+    let lane, startRow;
+    if (type === 'BOAT') {
+      lane = 0;
+      startRow = 0;
+    } else {
+      lane = 1 + Math.floor(Math.random() * 2);
+      startRow = 0;
+    }
+    // Avoid stacking with anything already close in the same lane.
+    if (state.threats.some(t => t.lane === lane && Math.abs(t.row - startRow) < 2)) return;
+
+    state.threats.push({ id: state.nextId++, type, lane, row: startRow, progress: 0 });
   }
 
   function tick() {
@@ -930,7 +1063,7 @@
         } else {
           state.misses++;
           sfxMiss();
-          flashAlert('CIBLE ÉCHAPPÉE !');
+          flashAlert('TARGET ESCAPED!');
           if (state.misses >= 3) {
             render();
             gameOver(false);
@@ -943,7 +1076,7 @@
     }
     state.threats = stillAlive;
     if (shipHit) {
-      flashAlert('NAVIRE TOUCHÉ !');
+      flashAlert('SHIP HIT!');
       sfxMiss();
       render();
       gameOver(true);
@@ -969,7 +1102,7 @@
     alertEl.innerHTML = msg;
     clearTimeout(flashAlert._t);
     flashAlert._t = setTimeout(() => {
-      alertEl.innerHTML = "U.S. NAVY<br>DETROIT D'ORMUZ";
+      alertEl.innerHTML = "U.S. NAVY<br>STRAIT OF HORMUZ";
     }, 700);
   }
 
@@ -997,7 +1130,7 @@
     state.running = false;
     if (state.timer) clearTimeout(state.timer);
     sfxOver();
-    bannerTitle.textContent = shipDestroyed ? 'NAVIRE COULÉ' : 'GAME OVER';
+    bannerTitle.textContent = shipDestroyed ? 'SHIP SUNK' : 'GAME OVER';
     bannerSub.textContent = `SCORE ${String(state.score).padStart(3,'0')} — PRESS GAME A`;
     banner.classList.add('show');
   }
@@ -1037,7 +1170,7 @@
     if (state.running) {
       state.paused = !state.paused;
       if (!state.paused) loop();
-      flashAlert(state.paused ? 'PAUSE' : 'REPRISE');
+      flashAlert(state.paused ? 'PAUSED' : 'RESUMED');
     } else {
       const now = new Date();
       flashAlert(now.toTimeString().slice(0,5));
