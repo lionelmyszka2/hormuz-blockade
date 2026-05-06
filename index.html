@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hormuz Blockade — Game &amp; Watch</title>
+<style>
+  :root {
+    /* Cream cabinet */
+    --case-cream:       #d8c890;
+    --case-cream-light: #ece0b0;
+    --case-cream-dark:  #ad9a60;
+    /* Burgundy red plastic frame */
+    --case-red:         #7a1c24;
+    --case-red-dark:    #4f0e14;
+    --case-red-light:   #9a2a32;
+    /* Big bright red buttons */
+    --btn-red:          #d62c34;
+    --btn-red-light:    #ee5a60;
+    --btn-red-dark:     #8a1820;
+    /* LCD */
+    --lcd-bg:           #c5bda0;
+    --lcd-bg-dark:      #a89e80;
+    --lcd-on:           #1a1a1a;
+    --lcd-off:          rgba(26,26,26,0.06);
+    --lcd-water:        #6ea8d4;
+    --lcd-sand:         #b08858;
+    /* Print */
+    --print:            #141414;
+    /* Silver plate */
+    --silver:           #efefef;
+    --silver-dark:      #b4b4b4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: radial-gradient(circle at center, #2a2a2a 0%, #0a0a0a 100%);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: #fff;
+    user-select: none;
+  }
+
+  /* ========================================================== */
+  /* CABINET  — modeled on Game & Watch Wide Screen "Octopus"    */
+  /* ========================================================== */
+  .cabinet {
+    width: 980px;
+    max-width: 96vw;
+    position: relative;
+    background:
+      /* subtle vertical brushed-metal texture */
+      repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.05) 0,
+        rgba(255,255,255,0.05) 1px,
+        rgba(0,0,0,0.025) 1px,
+        rgba(0,0,0,0.025) 2px
+      ),
+      linear-gradient(180deg, var(--case-cream-light) 0%, var(--case-cream) 55%, var(--case-cream-dark) 100%);
+    border-radius: 14px;
+    padding: 22px 16px 22px;
+    box-shadow:
+      inset 0 0 0 6px var(--case-red),
+      inset 0 0 0 8px var(--case-red-dark),
+      inset 0 2px 0 rgba(255,255,255,0.35),
+      0 30px 60px rgba(0,0,0,0.6),
+      0 12px 24px rgba(0,0,0,0.4);
+    display: grid;
+    grid-template-columns: 150px 1fr 160px;
+    grid-template-rows: 1fr auto;
+    column-gap: 14px;
+    row-gap: 8px;
+    min-height: 540px;
+  }
+
+  /* ====================== TOP-LEFT BRAND ====================== */
+  .brand-zone {
+    grid-column: 1; grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;   /* top/middle/bottom distribution */
+    padding: 14px 4px 0;
+    position: relative;
+  }
+  .brand-zone .top-block,
+  .right-zone .top-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+  }
+  /* Align GAME & WATCH plate + Nintendo text on the same vertical axis
+     as the eagle sticker and the LEFT button (centered in the flank). */
+  .brand-zone .top-block {
+    align-items: center;
+    align-self: center;
+  }
+
+  .brand-plate {
+    background:
+      linear-gradient(180deg,
+        #fbfbfb 0%,
+        #e2e2e2 35%,
+        #b8b8b8 55%,
+        #dcdcdc 80%,
+        #f3f3f3 100%);
+    border: 1px solid #8a8a8a;
+    border-radius: 9px;
+    padding: 8px 12px;
+    color: var(--print);
+    font-family: 'Arial Black', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      inset 0 -1px 0 rgba(0,0,0,0.18),
+      0 1px 2px rgba(0,0,0,0.25);
+    text-align: center;
+    min-width: 78px;
+  }
+  .brand-plate .row1 { display: block; }
+  .brand-plate .row2 { display: block; margin: 2px 0; font-size: 11px; font-weight: 900; }
+  .brand-plate .row3 { display: block; }
+
+  .nintendo-text {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--print);
+    letter-spacing: -0.3px;
+    padding-left: 6px;
+  }
+
+  /* ====================== SCREEN ZONE ====================== */
+  .screen-zone {
+    grid-column: 2; grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;          /* vertically center the LCD */
+    gap: 6px;
+  }
+
+  /* The two printed bracket-bars above and below the screen frame */
+  .frame-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 12px;
+    color: var(--print);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 0 4px;
+  }
+
+  .frame-bar .line {
+    flex: 1;
+    height: 7px;
+    position: relative;
+  }
+  .frame-bar .line::before { /* horizontal printed line */
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1.5px;
+    background: var(--print);
+  }
+  .frame-bar .line.left::after {  /* vertical end-cap on inner side (right) */
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 1.5px; height: 7px;
+    background: var(--print);
+  }
+  .frame-bar .line.right::after { /* vertical end-cap on inner side (left) */
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 1.5px; height: 7px;
+    background: var(--print);
+  }
+
+  /* Outer brushed-metal bezel around the screen — the raised relief */
+  .screen-bezel {
+    background:
+      /* fine vertical brush */
+      repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.10) 0,
+        rgba(255,255,255,0.10) 1px,
+        rgba(0,0,0,0.04) 1px,
+        rgba(0,0,0,0.04) 2px
+      ),
+      linear-gradient(180deg,
+        #f3e8c2 0%,
+        #cdb988 38%,
+        #b9a572 60%,
+        #e2d3a4 100%);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow:
+      /* outer recessed shadow into the cabinet */
+      0 1px 0 rgba(255,255,255,0.5),
+      0 -1px 0 rgba(0,0,0,0.25),
+      0 0 0 1px rgba(0,0,0,0.18),
+      /* inner highlight on the top edge */
+      inset 0 2px 0 rgba(255,255,255,0.7),
+      inset 0 -2px 0 rgba(0,0,0,0.28),
+      inset 1px 0 0 rgba(255,255,255,0.4),
+      inset -1px 0 0 rgba(0,0,0,0.18),
+      inset 0 0 0 0.5px rgba(255,255,255,0.5);
+  }
+
+  /* Burgundy red frame around the LCD (the iconic G&W bezel) */
+  .screen-frame {
+    background: linear-gradient(180deg, var(--case-red-light) 0%, var(--case-red) 50%, var(--case-red-dark) 100%);
+    border-radius: 6px;
+    padding: 10px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.18),
+      inset 0 -1px 0 rgba(0,0,0,0.4),
+      inset 0 0 6px rgba(0,0,0,0.4);
+  }
+
+  .screen-inner {
+    background: #0c0c0c;
+    border-radius: 3px;
+    padding: 2px;
+  }
+
+  .screen {
+    background:
+      /* very subtle wavy water shading at top */
+      linear-gradient(180deg,
+        rgba(110,168,212,0.10) 0%,
+        rgba(110,168,212,0.04) 35%,
+        rgba(176,136,88,0.06) 92%,
+        rgba(176,136,88,0.18) 100%),
+      linear-gradient(180deg, var(--lcd-bg) 0%, var(--lcd-bg-dark) 100%);
+    border-radius: 1px;
+    padding: 8px 10px;
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    box-shadow: inset 0 0 14px rgba(0,0,0,0.18);
+  }
+
+  /* ====================== RIGHT CONTROL ZONE ====================== */
+  .right-zone {
+    grid-column: 3; grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;   /* top/middle/bottom distribution */
+    align-items: flex-start;
+    padding: 14px 4px 0;
+    position: relative;
+  }
+  .right-zone .top-block { gap: 12px; }
+
+  .ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .ctrl-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--print);
+    letter-spacing: 1px;
+    width: 44px;
+    text-align: right;
+  }
+
+  /* Small oval/pill burgundy buttons (TIME / GAME A / GAME B) */
+  .sbtn {
+    width: 38px;
+    height: 16px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, var(--btn-red-light) 0%, var(--btn-red) 50%, var(--btn-red-dark) 100%);
+    border: 1px solid var(--case-red-dark);
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.4),
+      inset 0 -1px 1px rgba(0,0,0,0.4),
+      0 1px 2px rgba(0,0,0,0.3);
+    padding: 0;
+    font-size: 0;
+  }
+  .sbtn:active { transform: translateY(1px); }
+
+  .led {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #aaa 0%, #555 50%, #222 100%);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.6);
+    flex-shrink: 0;
+  }
+
+  .led-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--print);
+    letter-spacing: 0.5px;
+  }
+
+  /* ====================== SIDE BUTTON WRAPPERS ====================== */
+  /* LEFT button on the cabinet's left flank, RIGHT + FIRE stacked on the right
+     flank — like Snoopy Tennis HIT (left) and UP/DOWN (right).             */
+  .side-btn-wrap {
+    margin-bottom: 22px;         /* slightly raised from the bottom edge */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .left-btn-wrap  { align-items: center; padding: 0; }
+  .right-btn-wrap { align-items: center; padding: 0; gap: 10px; }
+
+  .stacked-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .bigbtn {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, var(--btn-red-light) 0%, var(--btn-red) 45%, var(--btn-red-dark) 100%);
+    border: 2px solid var(--case-red-dark);
+    cursor: pointer;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.45),
+      inset 0 -4px 6px rgba(0,0,0,0.45),
+      0 5px 8px rgba(0,0,0,0.35),
+      0 0 0 3px rgba(0,0,0,0.05);
+    transition: transform 0.05s, box-shadow 0.05s;
+    padding: 0;
+  }
+  .bigbtn:active, .bigbtn.pressed {
+    transform: translateY(2px);
+    box-shadow:
+      inset 0 2px 4px rgba(0,0,0,0.5),
+      0 1px 2px rgba(0,0,0,0.25);
+  }
+  .bigbtn.fire {
+    background:
+      radial-gradient(circle at 35% 30%, var(--btn-red-light) 0%, var(--btn-red) 45%, var(--btn-red-dark) 100%);
+  }
+
+  .big-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--print);
+    letter-spacing: 2px;
+  }
+
+  /* ========================================================== */
+  /* LCD SCREEN CONTENT                                          */
+  /* ========================================================== */
+  .status {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    color: var(--lcd-on);
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  .status .left, .status .right { display: flex; flex-direction: column; gap: 2px; }
+  .status .center { font-size: 11px; text-align: center; line-height: 1.2; }
+
+  .miss-row { display: flex; gap: 3px; margin-top: 2px; }
+  .miss-x {
+    width: 14px; height: 14px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--lcd-off);
+    font-size: 16px; font-weight: 900; line-height: 1;
+  }
+  .miss-x.on { color: var(--lcd-on); }
+
+  .play-area {
+    position: relative;
+    height: calc(100% - 46px);
+    margin-top: 6px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 0;
+  }
+
+  /* Strait shores (left & right) */
+  .play-area::before, .play-area::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 12px;
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        rgba(26,26,26,0.55) 0,
+        rgba(26,26,26,0.55) 3px,
+        transparent 3px,
+        transparent 6px
+      );
+    border: 1px solid rgba(26,26,26,0.5);
+  }
+  .play-area::before { left: -6px; }
+  .play-area::after  { right: -6px; }
+
+  .cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sprite {
+    width: 78%; height: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    opacity: 0;
+    transition: opacity 0.05s linear;
+  }
+  .sprite.on { opacity: 1; }
+
+  /* US Destroyer */
+  .destroyer { width: 70px; height: 36px; position: relative; }
+  .destroyer .hull, .destroyer .deck, .destroyer .tower,
+  .destroyer .mast, .destroyer .gun, .destroyer .flag {
+    position: absolute; background: var(--lcd-on);
+  }
+  .destroyer .hull {
+    bottom: 0; left: 6%; width: 88%; height: 38%;
+    clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%);
+  }
+  .destroyer .deck { bottom: 38%; left: 18%; width: 64%; height: 18%; }
+  .destroyer .tower { bottom: 56%; left: 38%; width: 16%; height: 26%; }
+  .destroyer .mast { bottom: 76%; left: 44%; width: 4%; height: 24%; }
+  .destroyer .gun { bottom: 38%; left: 8%; width: 12%; height: 14%; }
+  .destroyer .flag {
+    bottom: 70%; left: 60%; width: 18%; height: 12%;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+
+  /* Speedboat */
+  .speedboat { width: 44px; height: 24px; position: relative; }
+  .speedboat > * { position: absolute; background: var(--lcd-on); }
+  .speedboat .hull2 { bottom: 10%; left: 0; width: 100%; height: 45%; clip-path: polygon(0 0, 100% 0, 88% 100%, 12% 100%); }
+  .speedboat .cabin { bottom: 55%; left: 30%; width: 35%; height: 35%; clip-path: polygon(0 100%, 30% 0, 100% 0, 100% 100%); }
+  .speedboat .wake  { bottom: 0; left: 20%; width: 60%; height: 8%; clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%); }
+
+  /* Shahed drone */
+  .shahed { width: 50px; height: 30px; position: relative; }
+  .shahed > * { position: absolute; background: var(--lcd-on); }
+  .shahed .body { top: 38%; left: 40%; width: 20%; height: 50%; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  .shahed .wing { top: 50%; left: 8%; width: 84%; height: 24%; clip-path: polygon(0 100%, 50% 0, 100% 100%); }
+  .shahed .tail { top: 80%; left: 30%; width: 40%; height: 15%; }
+  .shahed .prop { top: 90%; left: 46%; width: 8%; height: 10%; }
+
+  /* Cruise missile */
+  .missile { width: 56px; height: 20px; position: relative; }
+  .missile > * { position: absolute; background: var(--lcd-on); }
+  .missile .body { top: 35%; left: 0; width: 80%; height: 30%; }
+  .missile .nose { top: 30%; left: 75%; width: 20%; height: 40%; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+  .missile .fin1 { top: 12%; left: 4%; width: 16%; height: 25%; clip-path: polygon(0 100%, 100% 100%, 100% 0); }
+  .missile .fin2 { top: 63%; left: 4%; width: 16%; height: 25%; clip-path: polygon(0 0, 100% 100%, 100% 0); }
+  .missile .flame { top: 38%; left: -22%; width: 22%; height: 24%; clip-path: polygon(0 50%, 100% 0, 80% 50%, 100% 100%); }
+
+  .bullet { width: 8px; height: 16px; background: var(--lcd-on); border-radius: 2px; }
+
+  .splash {
+    width: 60%; height: 60%;
+    background:
+      radial-gradient(circle, var(--lcd-on) 22%, transparent 26%),
+      radial-gradient(circle at 30% 30%, var(--lcd-on) 9%, transparent 11%),
+      radial-gradient(circle at 70% 30%, var(--lcd-on) 9%, transparent 11%),
+      radial-gradient(circle at 30% 70%, var(--lcd-on) 9%, transparent 11%),
+      radial-gradient(circle at 70% 70%, var(--lcd-on) 9%, transparent 11%);
+  }
+
+  .banner {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(197,189,160,0.92);
+    color: var(--lcd-on);
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+    text-align: center;
+  }
+  .banner.show { display: flex; }
+  .banner h2 { font-size: 22px; letter-spacing: 4px; }
+  .banner p  { font-size: 12px; letter-spacing: 2px; }
+
+  .start-prompt {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--lcd-on);
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: 2px;
+    animation: blink 1s steps(2) infinite;
+    text-align: center;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Footer print */
+  .footer-print {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    color: rgba(20,20,20,0.55);
+    letter-spacing: 1px;
+    padding: 0 4px;
+    margin-top: 2px;
+  }
+
+  /* ====================== STICKERS (eagle + POTUS) ====================== */
+  /* Painted / silk-screened straight onto the cream metal — no shadow, no halo */
+  .sticker-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 2px;
+  }
+  .sticker {
+    width: 100%;
+    max-width: 95px;
+    height: auto;
+    display: block;
+    /* Slight desaturation + multiply blend so it reads like print on metal */
+    mix-blend-mode: multiply;
+    opacity: 0.95;
+    filter: contrast(1.05) saturate(0.92);
+    transform: rotate(-4deg);
+    transition: transform 0.3s ease;
+  }
+  .right-zone .sticker { transform: rotate(4deg); }
+  .sticker:hover { transform: rotate(0deg) scale(1.05); }
+  .sticker.missing {
+    aspect-ratio: 1 / 1;
+    background:
+      repeating-linear-gradient(45deg,
+        rgba(0,0,0,0.08) 0 6px, transparent 6px 12px);
+    border: 1px dashed rgba(0,0,0,0.35);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(0,0,0,0.55);
+    text-align: center;
+    padding: 6px;
+    line-height: 1.3;
+  }
+
+  @media (max-width: 720px) {
+    .cabinet {
+      grid-template-columns: 90px 1fr 110px;
+      padding: 16px 18px 20px;
+    }
+    .bigbtn  { width: 56px; height: 56px; }
+    .bigbtn.fire { width: 44px; height: 44px; }
+    .nintendo-text { font-size: 12px; }
+    .brand-plate { font-size: 11px; padding: 5px 7px; min-width: 64px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cabinet">
+
+  <!-- LEFT side: brand plate + USA Eagle sticker + LEFT button -->
+  <div class="brand-zone">
+    <div class="top-block">
+      <div class="brand-plate">
+        <span class="row1">GAME</span>
+        <span class="row2">&amp;</span>
+        <span class="row3">WATCH</span>
+      </div>
+      <div class="nintendo-text">Nintendo</div>
+    </div>
+    <div class="sticker-wrap">
+      <img class="sticker" id="stickerEagle" src="assets/eagle.png" alt="USA Eagle"
+           onerror="this.outerHTML='&lt;div class=\'sticker missing\'&gt;Place&lt;br&gt;eagle.png&lt;br&gt;in /assets&lt;/div&gt;'">
+    </div>
+    <div class="side-btn-wrap left-btn-wrap">
+      <button class="bigbtn" id="btnLeft" aria-label="Gauche"></button>
+      <div class="big-label">◀ LEFT</div>
+    </div>
+  </div>
+
+  <!-- CENTER screen with bracket-bars top/bottom -->
+  <div class="screen-zone">
+    <div class="frame-bar">
+      <div class="line left"></div>
+      <span>HORMUZ BLOCKADE</span>
+      <div class="line right"></div>
+    </div>
+
+    <div class="screen-bezel">
+      <div class="screen-frame">
+        <div class="screen-inner">
+          <div class="screen" id="screen">
+          <div class="status">
+            <div class="left">
+              <div>SCORE</div>
+              <div id="score">000</div>
+            </div>
+            <div class="center" id="alert">U.S. NAVY<br>DETROIT D'ORMUZ</div>
+            <div class="right">
+              <div>MISS</div>
+              <div class="miss-row">
+                <div class="miss-x" id="miss1">✕</div>
+                <div class="miss-x" id="miss2">✕</div>
+                <div class="miss-x" id="miss3">✕</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="play-area" id="playArea"></div>
+
+          <div class="banner" id="banner">
+            <h2 id="bannerTitle">GAME OVER</h2>
+            <p id="bannerSub">PRESS GAME A</p>
+          </div>
+
+          <div class="start-prompt" id="startPrompt">
+            ◀ ▶ MOVE &nbsp;•&nbsp; SPACE FIRE &nbsp;•&nbsp; PRESS GAME A
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-bar">
+      <div class="line left"></div>
+      <span>WIDE SCREEN</span>
+      <div class="line right"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT control panel -->
+  <div class="right-zone">
+    <div class="top-block">
+      <div class="ctrl-row">
+        <span class="ctrl-label">GAME A</span>
+        <button class="sbtn" id="btnGameA" aria-label="Game A"></button>
+        <span class="led"></span>
+        <span class="led-label">ALARM</span>
+      </div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">GAME B</span>
+        <button class="sbtn" id="btnGameB" aria-label="Game B"></button>
+        <span class="led"></span>
+        <span class="led-label">ACL</span>
+      </div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">TIME</span>
+        <button class="sbtn" id="btnTime" aria-label="Time"></button>
+      </div>
+    </div>
+    <div class="sticker-wrap">
+      <img class="sticker" id="stickerPotus" src="assets/trump.png" alt="Commander in Chief"
+           onerror="this.outerHTML='&lt;div class=\'sticker missing\'&gt;Place&lt;br&gt;trump.png&lt;br&gt;in /assets&lt;/div&gt;'">
+    </div>
+    <div class="side-btn-wrap right-btn-wrap">
+      <div class="stacked-btn">
+        <button class="bigbtn fire" id="btnFire" aria-label="Tirer"></button>
+        <div class="big-label">▲ FIRE</div>
+      </div>
+      <div class="stacked-btn">
+        <button class="bigbtn" id="btnRight" aria-label="Droite"></button>
+        <div class="big-label">RIGHT ▶</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-print">
+    <span>HM-01</span>
+    <span>★ U.S. NAVY • 5TH FLEET • STRAIT OF HORMUZ ★</span>
+    <span>© 2026 LM</span>
+  </div>
+</div>
+
+<script>
+(() => {
+  const ROWS = 6;
+  const PLAYER_ROW = ROWS - 1;
+  const LANES = 3;
+  const FIRE_COOLDOWN_MS = 220;
+
+  const TYPES = {
+    BOAT:    { id: 'BOAT',    label: 'Vedette',          speed: 0.65, points: 10, render: 'speedboat' },
+    SHAHED:  { id: 'SHAHED',  label: 'Drone Shahed',     speed: 0.35, points: 20, render: 'shahed'    },
+    MISSILE: { id: 'MISSILE', label: 'Missile longue P.', speed: 0.95, points: 30, render: 'missile' },
+  };
+  const MAX_ON_SCREEN = 3;
+
+  const playArea = document.getElementById('playArea');
+  const scoreEl = document.getElementById('score');
+  const banner = document.getElementById('banner');
+  const bannerTitle = document.getElementById('bannerTitle');
+  const bannerSub = document.getElementById('bannerSub');
+  const startPrompt = document.getElementById('startPrompt');
+  const alertEl = document.getElementById('alert');
+  const missEls = [
+    document.getElementById('miss1'),
+    document.getElementById('miss2'),
+    document.getElementById('miss3'),
+  ];
+
+  const cells = [];
+  for (let r = 0; r < ROWS; r++) {
+    cells[r] = [];
+    for (let l = 0; l < LANES; l++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      const sprite = document.createElement('div');
+      sprite.className = 'sprite';
+      cell.appendChild(sprite);
+      playArea.appendChild(cell);
+      cells[r][l] = sprite;
+    }
+  }
+
+  function clearCell(r, l) {
+    const s = cells[r][l];
+    s.classList.remove('on');
+    s.innerHTML = '';
+  }
+  function paintDestroyer(r, l) {
+    const s = cells[r][l];
+    s.innerHTML = `<div class="destroyer">
+      <div class="mast"></div><div class="tower"></div>
+      <div class="deck"></div><div class="gun"></div>
+      <div class="flag"></div><div class="hull"></div>
+    </div>`;
+    s.classList.add('on');
+  }
+  function paintThreat(r, l, type) {
+    const s = cells[r][l];
+    let html = '';
+    if (type === 'speedboat') html = `<div class="speedboat"><div class="cabin"></div><div class="hull2"></div><div class="wake"></div></div>`;
+    else if (type === 'shahed') html = `<div class="shahed"><div class="wing"></div><div class="body"></div><div class="tail"></div><div class="prop"></div></div>`;
+    else if (type === 'missile') html = `<div class="missile"><div class="flame"></div><div class="fin1"></div><div class="fin2"></div><div class="body"></div><div class="nose"></div></div>`;
+    s.innerHTML = html;
+    s.classList.add('on');
+  }
+  function paintBullet(r, l) {
+    const s = cells[r][l];
+    s.innerHTML = `<div class="bullet"></div>`;
+    s.classList.add('on');
+  }
+  function paintSplash(r, l) {
+    const s = cells[r][l];
+    s.innerHTML = `<div class="splash"></div>`;
+    s.classList.add('on');
+  }
+
+  let state;
+  function freshState(mode='A') {
+    return {
+      running: false,
+      paused: false,
+      mode,
+      playerLane: 1,
+      threats: [],
+      bullets: [],
+      score: 0,
+      misses: 0,
+      tick: 0,
+      tickMs: mode === 'B' ? 520 : 680,
+      spawnRate: mode === 'B' ? 0.40 : 0.30,
+      minSpawnGap: 2,
+      lastSpawn: -99,
+      timer: null,
+      nextId: 1,
+      lastFire: 0,
+      flashes: [],
+    };
+  }
+  state = freshState();
+
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { audioCtx = null; }
+    }
+  }
+  function beep(freq=880, duration=0.06, type='square', vol=0.12) {
+    if (!audioCtx) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.value = vol;
+    o.connect(g).connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    o.stop(audioCtx.currentTime + duration + 0.02);
+  }
+  const sfxMove = () => beep(660, 0.04, 'square', 0.07);
+  const sfxFire = () => { beep(1400, 0.03, 'square', 0.08); setTimeout(()=>beep(900,0.03,'square',0.06),20); };
+  const sfxHitBoat   = () => { beep(1100, 0.05, 'square', 0.14); setTimeout(()=>beep(700,0.06,'square',0.12),50); };
+  const sfxHitShahed = () => { beep(1500, 0.05, 'square', 0.14); setTimeout(()=>beep(1000,0.07,'square',0.12),50); };
+  const sfxHitMissile= () => { beep(1900, 0.05, 'square', 0.16); setTimeout(()=>beep(1200,0.08,'square',0.14),60); };
+  const sfxMiss = () => beep(160, 0.22, 'sawtooth', 0.18);
+  const sfxOver = () => {
+    beep(440, 0.18, 'square', 0.16);
+    setTimeout(()=>beep(330,0.18,'square',0.16),200);
+    setTimeout(()=>beep(220,0.36,'square',0.16),400);
+  };
+
+  function render() {
+    for (let r = 0; r < ROWS; r++) for (let l = 0; l < LANES; l++) clearCell(r, l);
+    for (const t of state.threats) {
+      const r = Math.floor(t.row);
+      if (r < 0 || r >= PLAYER_ROW) continue;
+      paintThreat(r, t.lane, TYPES[t.type].render);
+    }
+    for (const b of state.bullets) {
+      if (b.row >= 0 && b.row < PLAYER_ROW) paintBullet(b.row, b.lane);
+    }
+    for (const f of state.flashes) {
+      paintSplash(f.row, f.lane);
+    }
+    paintDestroyer(PLAYER_ROW, state.playerLane);
+    scoreEl.textContent = String(state.score).padStart(3, '0');
+    missEls.forEach((el, i) => el.classList.toggle('on', i < state.misses));
+  }
+
+  function spawn() {
+    if (state.threats.length >= MAX_ON_SCREEN) return;
+    const lane = Math.floor(Math.random() * LANES);
+    if (state.threats.some(t => t.lane === lane && t.row < 2)) return;
+    const r = Math.random();
+    let type;
+    if (state.score < 30)       type = r < 0.7 ? 'BOAT' : (r < 0.9 ? 'SHAHED' : 'MISSILE');
+    else if (state.score < 100) type = r < 0.5 ? 'BOAT' : (r < 0.85 ? 'SHAHED' : 'MISSILE');
+    else                        type = r < 0.35 ? 'BOAT' : (r < 0.7 ? 'SHAHED' : 'MISSILE');
+    state.threats.push({ id: state.nextId++, type, lane, row: 0, progress: 0 });
+  }
+
+  function tick() {
+    state.tick++;
+    state.flashes = [];
+
+    const survivingBullets = [];
+    for (const b of state.bullets) {
+      b.row -= 1;
+      if (b.row >= 0) survivingBullets.push(b);
+    }
+    state.bullets = survivingBullets;
+
+    for (const t of state.threats) {
+      t.progress += TYPES[t.type].speed;
+      while (t.progress >= 1) {
+        t.row += 1;
+        t.progress -= 1;
+      }
+    }
+
+    const destroyedThreatIds = new Set();
+    const usedBulletIds = new Set();
+    for (const b of state.bullets) {
+      let target = null;
+      for (const t of state.threats) {
+        if (destroyedThreatIds.has(t.id)) continue;
+        if (t.lane !== b.lane) continue;
+        // Bullet swept from b.row+1 (start of tick) to b.row (end of tick).
+        // Hit only if the threat is in that swept range — otherwise the bullet
+        // continues travelling visibly cell by cell.
+        const tFloor = Math.floor(t.row);
+        if (tFloor === b.row || tFloor === b.row + 1) {
+          if (!target || t.row > target.row) target = t;
+        }
+      }
+      if (target) {
+        destroyedThreatIds.add(target.id);
+        usedBulletIds.add(b.id);
+        state.flashes.push({ row: Math.floor(target.row), lane: target.lane });
+        state.score += TYPES[target.type].points;
+        if (target.type === 'BOAT') sfxHitBoat();
+        else if (target.type === 'SHAHED') sfxHitShahed();
+        else sfxHitMissile();
+        flashAlert(`+${TYPES[target.type].points} ${TYPES[target.type].label.toUpperCase()}`);
+      }
+    }
+    state.threats = state.threats.filter(t => !destroyedThreatIds.has(t.id));
+    state.bullets = state.bullets.filter(b => !usedBulletIds.has(b.id));
+
+    const stillAlive = [];
+    let shipHit = false;
+    for (const t of state.threats) {
+      if (Math.floor(t.row) >= PLAYER_ROW) {
+        state.flashes.push({ row: PLAYER_ROW, lane: t.lane });
+        if (t.lane === state.playerLane) {
+          shipHit = true;
+        } else {
+          state.misses++;
+          sfxMiss();
+          flashAlert('CIBLE ÉCHAPPÉE !');
+          if (state.misses >= 3) {
+            render();
+            gameOver(false);
+            return;
+          }
+        }
+      } else {
+        stillAlive.push(t);
+      }
+    }
+    state.threats = stillAlive;
+    if (shipHit) {
+      flashAlert('NAVIRE TOUCHÉ !');
+      sfxMiss();
+      render();
+      gameOver(true);
+      return;
+    }
+
+    if (state.tick - state.lastSpawn >= state.minSpawnGap) {
+      if (Math.random() < state.spawnRate) {
+        spawn();
+        state.lastSpawn = state.tick;
+      }
+    }
+
+    if (state.tick % 60 === 0) {
+      state.tickMs = Math.max(380, state.tickMs - 25);
+      state.spawnRate = Math.min(0.45, state.spawnRate + 0.025);
+    }
+
+    render();
+  }
+
+  function flashAlert(msg) {
+    alertEl.innerHTML = msg;
+    clearTimeout(flashAlert._t);
+    flashAlert._t = setTimeout(() => {
+      alertEl.innerHTML = "U.S. NAVY<br>DETROIT D'ORMUZ";
+    }, 700);
+  }
+
+  function loop() {
+    if (!state.running || state.paused) return;
+    tick();
+    state.timer = setTimeout(loop, state.tickMs);
+  }
+
+  function startGame(mode='A') {
+    ensureAudio();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    if (state.timer) clearTimeout(state.timer);
+    state = freshState(mode);
+    state.running = true;
+    banner.classList.remove('show');
+    startPrompt.style.display = 'none';
+    render();
+    beep(880,0.07,'square',0.14);
+    setTimeout(()=>beep(1200,0.07,'square',0.14),90);
+    state.timer = setTimeout(loop, 600);
+  }
+
+  function gameOver(shipDestroyed=false) {
+    state.running = false;
+    if (state.timer) clearTimeout(state.timer);
+    sfxOver();
+    bannerTitle.textContent = shipDestroyed ? 'NAVIRE COULÉ' : 'GAME OVER';
+    bannerSub.textContent = `SCORE ${String(state.score).padStart(3,'0')} — PRESS GAME A`;
+    banner.classList.add('show');
+  }
+
+  function moveLeft()  { if (!state.running) return; if (state.playerLane > 0) { state.playerLane--; sfxMove(); render(); } }
+  function moveRight() { if (!state.running) return; if (state.playerLane < LANES - 1) { state.playerLane++; sfxMove(); render(); } }
+  function fire() {
+    if (!state.running) return;
+    const now = performance.now();
+    if (now - state.lastFire < FIRE_COOLDOWN_MS) return;
+    state.lastFire = now;
+    state.bullets.push({ id: state.nextId++, lane: state.playerLane, row: PLAYER_ROW - 1 });
+    sfxFire();
+    render();
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft')      { e.preventDefault(); moveLeft();  pressVisual('btnLeft'); }
+    else if (e.key === 'ArrowRight'){ e.preventDefault(); moveRight(); pressVisual('btnRight'); }
+    else if (e.code === 'Space')    { e.preventDefault(); fire();      pressVisual('btnFire'); }
+    else if (e.key === 'Enter')     { if (!state.running) startGame('A'); }
+  });
+
+  function pressVisual(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('pressed');
+    setTimeout(()=>el.classList.remove('pressed'), 100);
+  }
+
+  document.getElementById('btnLeft').addEventListener('click', moveLeft);
+  document.getElementById('btnRight').addEventListener('click', moveRight);
+  document.getElementById('btnFire').addEventListener('click', fire);
+  document.getElementById('btnGameA').addEventListener('click', () => startGame('A'));
+  document.getElementById('btnGameB').addEventListener('click', () => startGame('B'));
+  document.getElementById('btnTime').addEventListener('click', () => {
+    if (state.running) {
+      state.paused = !state.paused;
+      if (!state.paused) loop();
+      flashAlert(state.paused ? 'PAUSE' : 'REPRISE');
+    } else {
+      const now = new Date();
+      flashAlert(now.toTimeString().slice(0,5));
+    }
+  });
+
+  let touchStartX = null, touchStartY = null;
+  const screenEl = document.getElementById('screen');
+  screenEl.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  });
+  screenEl.addEventListener('touchend', (e) => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) < 12 && Math.abs(dy) < 12) fire();
+    else if (Math.abs(dx) > Math.abs(dy)) (dx < 0 ? moveLeft() : moveRight());
+    touchStartX = touchStartY = null;
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
