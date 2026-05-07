@@ -438,7 +438,10 @@
     min-height: 10px;
   }
 
-  /* ========= TRUMP-MODE OVERLAY (shown in the left buffer) ========= */
+  /* ========= TRUMP-MODE OVERLAY (shown in the left buffer) =========
+     Sprite is anchored at the BOTTOM of the strip so Trump stands
+     "on" the U.A.E. land area painted on the LCD. Dollar bills float
+     upward from his position into the air above. */
   .trump-mode {
     position: absolute;
     left: 4px;
@@ -446,8 +449,9 @@
     bottom: 14px;  /* above start-prompt */
     width: 21%;
     display: none;
-    align-items: center;
+    align-items: flex-end;       /* sprite sits at the bottom of the strip */
     justify-content: center;
+    padding-bottom: 4px;
     z-index: 5;
     pointer-events: none;
   }
@@ -1083,19 +1087,28 @@
   const trumpModeEl = document.getElementById('trumpMode');
 
   function render() {
+    // Always start by clearing every cell — sprites only appear during play.
     for (let r = 0; r < ROWS; r++) for (let l = 0; l < LANES; l++) clearCell(r, l);
-    for (const t of state.threats) {
-      const r = Math.floor(t.row);
-      if (r < 0 || r >= PLAYER_ROW) continue;
-      paintThreat(r, t.lane, TYPES[t.type].render);
+
+    if (state.running) {
+      for (const t of state.threats) {
+        const r = Math.floor(t.row);
+        if (r < 0 || r >= PLAYER_ROW) continue;
+        paintThreat(r, t.lane, TYPES[t.type].render);
+      }
+      for (const b of state.bullets) {
+        if (b.row >= 0 && b.row < PLAYER_ROW) paintBullet(b.row, b.lane);
+      }
+      for (const f of state.flashes) {
+        paintSplash(f.row, f.lane);
+      }
+      // The destroyer disappears while Trump is printing money — only
+      // re-appears once the player presses RIGHT to retake control.
+      if (!state.inTrumpMode) {
+        paintDestroyer(PLAYER_ROW, state.playerLane);
+      }
     }
-    for (const b of state.bullets) {
-      if (b.row >= 0 && b.row < PLAYER_ROW) paintBullet(b.row, b.lane);
-    }
-    for (const f of state.flashes) {
-      paintSplash(f.row, f.lane);
-    }
-    paintDestroyer(PLAYER_ROW, state.playerLane);
+
     scoreEl.textContent = String(state.score).padStart(3, '0');
     missEls.forEach((el, i) => el.classList.toggle('on', i < state.misses));
 
@@ -1106,7 +1119,8 @@
       moneyBarEl.style.width = pct + '%';
       moneyBarEl.classList.toggle('low', pct < 20);
     }
-    if (trumpModeEl) trumpModeEl.classList.toggle('active', state.inTrumpMode);
+    // Money-Trump only visible mid-game when active; hidden on game over.
+    if (trumpModeEl) trumpModeEl.classList.toggle('active', state.running && state.inTrumpMode);
   }
 
   function spawn() {
@@ -1256,10 +1270,16 @@
     if (state.timer) clearTimeout(state.timer);
     if (state.moneyTimer) { clearInterval(state.moneyTimer); state.moneyTimer = null; }
     state.inTrumpMode = false;
+    // Wipe the LCD: no more boats, missiles, drones, bullets, splashes, or
+    // destroyer — only the angry-Trump banner stays.
+    state.threats = [];
+    state.bullets = [];
+    state.flashes = [];
     sfxOver();
     bannerTitle.textContent = bankrupted ? 'BANKRUPT' : (shipDestroyed ? 'SHIP SUNK' : 'GAME OVER');
     bannerSub.textContent = `SCORE ${String(state.score).padStart(3,'0')} — PRESS GAME A`;
     banner.classList.add('show');
+    render();
   }
 
   // ============================================================
