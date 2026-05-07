@@ -1009,7 +1009,7 @@
   }
 
   // Money / Trump-mode constants
-  const MONEY_MAX        = 200_000_000;
+  const MONEY_MAX        = 50_000_000;
   const MONEY_PER_SECOND = 1_000_000;
   const COST_BY_LANE     = [150_000, 450_000, 12_000_000]; // boat / Shahed / missile
 
@@ -1025,9 +1025,11 @@
       score: 0,
       misses: 0,
       tick: 0,
-      tickMs: mode === 'B' ? 520 : 680,
-      spawnRate: mode === 'B' ? 0.40 : 0.30,
-      minSpawnGap: 2,
+      // Game A starts at the previous Game B pace; Game B is even faster.
+      // Both modes ramp up steadily — see tick() for the ramp constants.
+      tickMs: mode === 'B' ? 420 : 520,
+      spawnRate: mode === 'B' ? 0.55 : 0.40,
+      minSpawnGap: mode === 'B' ? 1 : 2,
       lastSpawn: -99,
       timer: null,
       nextId: 1,
@@ -1228,9 +1230,18 @@
       }
     }
 
-    if (state.tick % 60 === 0) {
-      state.tickMs = Math.max(380, state.tickMs - 25);
-      state.spawnRate = Math.min(0.45, state.spawnRate + 0.025);
+    // Progressive difficulty ramp: every 30 ticks the wave speeds up
+    // and the spawn density grows. Game B ramps faster and goes lower
+    // on the floor (= even more relentless than Game A).
+    if (state.tick % 30 === 0) {
+      const floor = state.mode === 'B' ? 220 : 280;
+      const ceil  = state.mode === 'B' ? 0.85 : 0.70;
+      const dt    = state.mode === 'B' ? 22   : 18;
+      const dr    = state.mode === 'B' ? 0.030 : 0.022;
+      state.tickMs    = Math.max(floor, state.tickMs - dt);
+      state.spawnRate = Math.min(ceil,  state.spawnRate + dr);
+      // Allow back-to-back spawns once things really get hectic.
+      if (state.tickMs < 300) state.minSpawnGap = 1;
     }
 
     render();
