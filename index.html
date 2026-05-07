@@ -387,7 +387,14 @@
     letter-spacing: 1px;
   }
   .status .left, .status .right { display: flex; flex-direction: column; gap: 2px; }
-  .status .center { font-size: 11px; text-align: center; line-height: 1.2; }
+  .status .center {
+    font-size: 11px;
+    text-align: center;
+    line-height: 1.2;
+    /* Reserve enough horizontal room for the gauge so the column
+       width doesn't fluctuate with the money/flash text. */
+    min-width: 230px;
+  }
 
   .miss-row { display: flex; gap: 3px; margin-top: 2px; }
   .miss-x {
@@ -408,13 +415,16 @@
     line-height: 1;
   }
   .money-bar {
-    width: 100%;
-    max-width: 220px;
+    /* Fixed width so the gauge never expands/contracts with the money
+       amount or with the alert flash text underneath it. */
+    width: 220px;
+    max-width: 100%;
     height: 6px;
     margin: 2px auto 0;
     background: rgba(26,26,26,0.18);
     border: 1px solid rgba(26,26,26,0.55);
     position: relative;
+    box-sizing: border-box;
   }
   .money-bar-fill {
     height: 100%;
@@ -438,11 +448,14 @@
     min-height: 10px;
   }
 
-  /* ========= TRUMP-MODE OVERLAY (shown in the left buffer) =========
-     Sprite is anchored at the BOTTOM of the strip so Trump stands
-     "on" the U.A.E. land area painted on the LCD. Dollar bills float
-     upward from his position into the air above. */
-  .trump-mode {
+  /* ========= LEFT-BUFFER TRUMP SLOTS =========
+     Two stacked containers occupy the same area at the bottom of the U.A.E.
+     strip. Only one is visible at a time:
+       • .trump-watch — Trump with binoculars, on screen while the player
+         actively controls the destroyer.
+       • .trump-mode  — Trump throwing dollars, on screen during Trump-money
+         mode (gauge refilling).                                          */
+  .trump-watch, .trump-mode {
     position: absolute;
     left: 4px;
     top: 50px;     /* below status row */
@@ -455,14 +468,19 @@
     z-index: 5;
     pointer-events: none;
   }
-  .trump-mode.active { display: flex; }
-  .trump-mode-img {
+  .trump-watch.active, .trump-mode.active { display: flex; }
+  .trump-side-img {
     width: 88%;
     max-width: 90px;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     -ms-interpolation-mode: nearest-neighbor;
-    animation: trumpRage 0.22s steps(2) infinite;
+  }
+  .trump-mode  .trump-side-img { animation: trumpRage  0.22s steps(2) infinite; }
+  .trump-watch .trump-side-img { animation: trumpScan 1.6s steps(2) infinite; }
+  @keyframes trumpScan {
+    0%, 100% { transform: translateX(-1px); }
+    50%      { transform: translateX( 1px); }
   }
   .trump-mode .dollar {
     position: absolute;
@@ -830,12 +848,19 @@
             </div>
           </div>
 
-          <!-- Trump-mode visual: appears in the left buffer (over U.A.E. land)
-               when the player presses LEFT past lane 0. Trump (the
-               money-printing variant) is animated and showering dollars. -->
+          <!-- Trump-watch sprite: visible whenever the destroyer is active
+               (i.e. game running AND not in Trump-money mode). Trump scans
+               the strait through binoculars while the player fights. -->
+          <div class="trump-watch" id="trumpWatch" aria-hidden="true">
+            <img class="trump-side-img" src="assets/trump-watch.png" alt=""/>
+          </div>
+
+          <!-- Trump-money sprite: visible when the player presses LEFT past
+               lane 0 to activate Trump-money mode. The sprite is animated
+               and dollar bills flow upward while the cagnotte refills. -->
           <div class="trump-mode" id="trumpMode" aria-hidden="true">
-            <img class="trump-mode-img" src="assets/trump-money.png" alt=""
-                 onerror="this.outerHTML='&lt;div class=&quot;trump-mode-img fallback&quot;&gt;Save trump-money.png&lt;br&gt;in /assets&lt;/div&gt;'"/>
+            <img class="trump-side-img" src="assets/trump-money.png" alt=""
+                 onerror="this.outerHTML='&lt;div class=&quot;trump-side-img fallback&quot;&gt;Save trump-money.png&lt;br&gt;in /assets&lt;/div&gt;'"/>
             <div class="dollar d1">$</div>
             <div class="dollar d2">$</div>
             <div class="dollar d3">$</div>
@@ -1086,9 +1111,10 @@
     return '$' + Math.max(0, Math.floor(n)).toLocaleString('en-US');
   }
 
-  const moneyEl     = document.getElementById('moneyAmount');
-  const moneyBarEl  = document.getElementById('moneyBarFill');
-  const trumpModeEl = document.getElementById('trumpMode');
+  const moneyEl      = document.getElementById('moneyAmount');
+  const moneyBarEl   = document.getElementById('moneyBarFill');
+  const trumpModeEl  = document.getElementById('trumpMode');
+  const trumpWatchEl = document.getElementById('trumpWatch');
 
   function render() {
     // Always start by clearing every cell — sprites only appear during play.
@@ -1123,8 +1149,12 @@
       moneyBarEl.style.width = pct + '%';
       moneyBarEl.classList.toggle('low', pct < 20);
     }
-    // Money-Trump only visible mid-game when active; hidden on game over.
-    if (trumpModeEl) trumpModeEl.classList.toggle('active', state.running && state.inTrumpMode);
+    // Trump sprites in the left buffer:
+    //   • Watch sprite while the player actively controls the destroyer.
+    //   • Money sprite while Trump-mode is refilling the cagnotte.
+    //   • Both hidden on game over (only the angry-Trump banner shows).
+    if (trumpModeEl)  trumpModeEl.classList.toggle('active',  state.running &&  state.inTrumpMode);
+    if (trumpWatchEl) trumpWatchEl.classList.toggle('active', state.running && !state.inTrumpMode);
   }
 
   function spawn() {
