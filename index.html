@@ -1010,8 +1010,10 @@
 
   // Money / Trump-mode constants
   const MONEY_MAX        = 50_000_000;
-  const MONEY_PER_SECOND = 1_000_000;
+  const MONEY_PER_SECOND = 2_500_000;
   const COST_BY_LANE     = [150_000, 450_000, 12_000_000]; // boat / Shahed / missile
+  const WEAPON_BY_LANE   = ['HELLFIRE', 'AIM-9X', 'SM-3'];
+  const COST_LABEL       = ['-$150K', '-$450K', '-$12M'];
 
   let state;
   function freshState(mode='A') {
@@ -1129,9 +1131,12 @@
     if (state.threats.length >= MAX_ON_SCREEN) return;
     const r = Math.random();
     let type;
-    if (state.score < 30)       type = r < 0.7 ? 'BOAT' : (r < 0.9 ? 'SHAHED' : 'MISSILE');
-    else if (state.score < 100) type = r < 0.5 ? 'BOAT' : (r < 0.85 ? 'SHAHED' : 'MISSILE');
-    else                        type = r < 0.35 ? 'BOAT' : (r < 0.7 ? 'SHAHED' : 'MISSILE');
+    // Threat mix tuned around weapon costs: cheap targets (boats/Shahed)
+    // dominate the wave, expensive SM-3 intercepts stay rare even in late game
+    // so the cagnotte doesn't drain too quickly.
+    if (state.score < 30)       type = r < 0.65 ? 'BOAT' : (r < 0.96 ? 'SHAHED' : 'MISSILE'); // 65/31/4
+    else if (state.score < 100) type = r < 0.50 ? 'BOAT' : (r < 0.92 ? 'SHAHED' : 'MISSILE'); // 50/42/8
+    else                        type = r < 0.40 ? 'BOAT' : (r < 0.85 ? 'SHAHED' : 'MISSILE'); // 40/45/15
 
     // Each threat type is dedicated to its own lane (visible to the player so
     // they know what every shot will cost before pulling the trigger):
@@ -1197,7 +1202,8 @@
     let shipHit = false;
     for (const t of state.threats) {
       if (Math.floor(t.row) >= PLAYER_ROW) {
-        state.flashes.push({ row: PLAYER_ROW, lane: t.lane });
+        // No splash for non-intercepted threats — the explosion symbol is
+        // reserved for successful interceptions only.
         if (t.lane === state.playerLane) {
           shipHit = true;
         } else {
@@ -1351,8 +1357,10 @@
     state.lastFire = now;
 
     // Each shot drains the cagnotte. Cost depends on the lane being defended.
-    const cost = COST_BY_LANE[state.playerLane];
+    const lane = state.playerLane;
+    const cost = COST_BY_LANE[lane];
     state.money -= cost;
+    flashAlert(`${WEAPON_BY_LANE[lane]} ${COST_LABEL[lane]}`);
     if (state.money <= 0) {
       state.money = 0;
       render();
@@ -1360,7 +1368,7 @@
       return;
     }
 
-    state.bullets.push({ id: state.nextId++, lane: state.playerLane, row: PLAYER_ROW - 1 });
+    state.bullets.push({ id: state.nextId++, lane, row: PLAYER_ROW - 1 });
     sfxFire();
     render();
   }
