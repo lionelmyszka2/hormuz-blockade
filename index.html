@@ -827,10 +827,11 @@
           </div>
 
           <!-- Trump-mode visual: appears in the left buffer (over U.A.E. land)
-               when the player presses LEFT past lane 0. Trump is animated
-               and "prints" dollar bills that float upward. -->
+               when the player presses LEFT past lane 0. Trump (the
+               money-printing variant) is animated and showering dollars. -->
           <div class="trump-mode" id="trumpMode" aria-hidden="true">
-            <img class="trump-mode-img" src="assets/trump-angry.png" alt=""/>
+            <img class="trump-mode-img" src="assets/trump-money.png" alt=""
+                 onerror="this.outerHTML='&lt;div class=&quot;trump-mode-img fallback&quot;&gt;Save trump-money.png&lt;br&gt;in /assets&lt;/div&gt;'"/>
             <div class="dollar d1">$</div>
             <div class="dollar d2">$</div>
             <div class="dollar d3">$</div>
@@ -1005,7 +1006,7 @@
 
   // Money / Trump-mode constants
   const MONEY_MAX        = 200_000_000;
-  const MONEY_PER_SECOND = 100_000;
+  const MONEY_PER_SECOND = 1_000_000;
   const COST_BY_LANE     = [150_000, 450_000, 12_000_000]; // boat / Shahed / missile
 
   let state;
