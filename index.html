@@ -555,6 +555,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Crucial for CSS grid: prevent oversized sprite content from inflating
+       the grid track and pushing the destroyer row downward. */
+    min-width: 0;
+    min-height: 0;
+    overflow: visible;
   }
 
   .sprite {
@@ -575,11 +580,12 @@
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     -ms-interpolation-mode: nearest-neighbor;
+    flex-shrink: 0;
   }
   .sprite-img.s-destroyer { width: 96px; height: auto; }
-  .sprite-img.s-speedboat { width: auto; height: 90px; }
-  .sprite-img.s-shahed    { width: 72px; height: auto; }
-  .sprite-img.s-missile   { width: auto; height: 120px; }
+  .sprite-img.s-speedboat { width: auto; height: 56px; }
+  .sprite-img.s-shahed    { width: 52px; height: auto; }
+  .sprite-img.s-missile   { width: auto; height: 70px; }
 
   /* Player CIWS round — thin missile, pointed nose UP toward the threats */
   .bullet {
