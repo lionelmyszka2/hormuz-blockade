@@ -476,12 +476,9 @@
     image-rendering: crisp-edges;
     -ms-interpolation-mode: nearest-neighbor;
   }
-  .trump-mode  .trump-side-img { animation: trumpRage  0.22s steps(2) infinite; }
-  .trump-watch .trump-side-img { animation: trumpScan 1.6s steps(2) infinite; }
-  @keyframes trumpScan {
-    0%, 100% { transform: translateX(-1px); }
-    50%      { transform: translateX( 1px); }
-  }
+  .trump-mode  .trump-side-img { animation: trumpRage 0.22s steps(2) infinite; }
+  /* Trump-watch stays perfectly still — he's just observing the strait. */
+  .trump-watch .trump-side-img { animation: none; }
   .trump-mode .dollar {
     position: absolute;
     font-family: 'Courier New', monospace;
@@ -571,64 +568,18 @@
   }
   .sprite.on { opacity: 1; }
 
-  /* US Destroyer */
-  .destroyer { width: 70px; height: 36px; position: relative; }
-  .destroyer .hull, .destroyer .deck, .destroyer .tower,
-  .destroyer .mast, .destroyer .gun, .destroyer .flag {
-    position: absolute; background: var(--lcd-on);
+  /* All in-game sprites are now inline SVG with crisp pixel edges so they
+     match the LCD silk-screen aesthetic and the Trump pixel-art figures. */
+  .sprite-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    color: var(--lcd-on);
   }
-  .destroyer .hull {
-    bottom: 0; left: 6%; width: 88%; height: 38%;
-    clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%);
-  }
-  .destroyer .deck { bottom: 38%; left: 18%; width: 64%; height: 18%; }
-  .destroyer .tower { bottom: 56%; left: 38%; width: 16%; height: 26%; }
-  .destroyer .mast { bottom: 76%; left: 44%; width: 4%; height: 24%; }
-  .destroyer .gun { bottom: 38%; left: 8%; width: 12%; height: 14%; }
-  .destroyer .flag {
-    bottom: 70%; left: 60%; width: 18%; height: 12%;
-    clip-path: polygon(0 0, 100% 50%, 0 100%);
-  }
-
-  /* Speedboat */
-  .speedboat { width: 44px; height: 24px; position: relative; }
-  .speedboat > * { position: absolute; background: var(--lcd-on); }
-  .speedboat .hull2 { bottom: 10%; left: 0; width: 100%; height: 45%; clip-path: polygon(0 0, 100% 0, 88% 100%, 12% 100%); }
-  .speedboat .cabin { bottom: 55%; left: 30%; width: 35%; height: 35%; clip-path: polygon(0 100%, 30% 0, 100% 0, 100% 100%); }
-  .speedboat .wake  { bottom: 0; left: 20%; width: 60%; height: 8%; clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%); }
-
-  /* Shahed drone */
-  /* Shahed drone — nose pointing DOWN (toward the destroyer) */
-  .shahed { width: 50px; height: 30px; position: relative; }
-  .shahed > * { position: absolute; background: var(--lcd-on); }
-  .shahed .prop { top: 0%; left: 46%; width: 8%; height: 8%; }
-  .shahed .tail { top: 6%; left: 30%; width: 40%; height: 12%; }
-  .shahed .wing { top: 22%; left: 8%; width: 84%; height: 30%; clip-path: polygon(0 0, 100% 0, 50% 100%); }
-  .shahed .body { top: 12%; left: 40%; width: 20%; height: 50%; clip-path: polygon(0 0, 100% 0, 50% 100%); }
-
-  /* Cruise missile */
-  /* Long-range missile — vertical, nose pointing DOWN, exhaust at the top */
-  .missile { width: 18px; height: 50px; position: relative; }
-  .missile > * { position: absolute; background: var(--lcd-on); }
-  .missile .flame {
-    top: -18%; left: 33%; width: 34%; height: 22%;
-    clip-path: polygon(50% 100%, 0 0, 30% 50%, 50% 0, 70% 50%, 100% 0);
-  }
-  .missile .fin1 {
-    top: 8%; left: 0; width: 26%; height: 18%;
-    clip-path: polygon(100% 0, 100% 100%, 0 100%);
-  }
-  .missile .fin2 {
-    top: 8%; right: 0; width: 26%; height: 18%;
-    clip-path: polygon(0 0, 100% 100%, 0 100%);
-  }
-  .missile .body {
-    top: 0; left: 35%; width: 30%; height: 78%;
-  }
-  .missile .nose {
-    top: 72%; left: 30%; width: 40%; height: 28%;
-    clip-path: polygon(0 0, 100% 0, 50% 100%);
-  }
+  .sprite-svg.s-destroyer { max-width: 78px; max-height: 36px; }
+  .sprite-svg.s-speedboat { max-width: 32px; max-height: 38px; }
+  .sprite-svg.s-shahed    { max-width: 44px; max-height: 36px; }
+  .sprite-svg.s-missile   { max-width: 18px; max-height: 44px; }
 
   /* Player CIWS round — thin missile, pointed nose UP toward the threats */
   .bullet {
@@ -1004,22 +955,137 @@
     s.classList.remove('on');
     s.innerHTML = '';
   }
+  // ============================================================
+  // Pixel-art sprites — drawn as inline SVG with crisp edges so the
+  // shapes look like proper LCD-print silhouettes rather than flat
+  // CSS blocks. Each sprite is built from a handful of <rect>s.
+  // ============================================================
+  const SVG_DESTROYER = `
+    <svg class="sprite-svg s-destroyer" viewBox="0 0 78 36"
+         xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"
+         aria-hidden="true">
+      <!-- Bow (left, pointing into the strait) -->
+      <rect x="0"  y="14" width="6"  height="2" fill="currentColor"/>
+      <rect x="2"  y="12" width="6"  height="6" fill="currentColor"/>
+      <rect x="4"  y="10" width="8"  height="10" fill="currentColor"/>
+      <!-- Forward gun + main hull -->
+      <rect x="8"  y="14" width="12" height="6" fill="currentColor"/>
+      <rect x="10" y="11" width="4"  height="3" fill="currentColor"/>
+      <rect x="11" y="6"  width="2"  height="5" fill="currentColor"/>
+      <!-- Main hull body -->
+      <rect x="14" y="10" width="48" height="14" fill="currentColor"/>
+      <!-- Bridge / superstructure -->
+      <rect x="22" y="6"  width="14" height="4" fill="currentColor"/>
+      <rect x="26" y="2"  width="6"  height="4" fill="currentColor"/>
+      <!-- Mast -->
+      <rect x="28" y="0"  width="2"  height="2" fill="currentColor"/>
+      <!-- Aft superstructure + funnel -->
+      <rect x="40" y="4"  width="8"  height="6" fill="currentColor"/>
+      <rect x="42" y="0"  width="4"  height="4" fill="currentColor"/>
+      <!-- VLS hatch detail -->
+      <rect x="50" y="6"  width="8"  height="4" fill="currentColor"/>
+      <!-- Stern -->
+      <rect x="62" y="12" width="10" height="10" fill="currentColor"/>
+      <rect x="64" y="22" width="6"  height="2" fill="currentColor"/>
+      <!-- Wake foam at the rear -->
+      <rect x="72" y="14" width="2"  height="2" fill="currentColor"/>
+      <rect x="75" y="16" width="2"  height="2" fill="currentColor"/>
+      <rect x="73" y="20" width="2"  height="2" fill="currentColor"/>
+    </svg>`;
+
+  const SVG_SPEEDBOAT = `
+    <svg class="sprite-svg s-speedboat" viewBox="0 0 32 38"
+         xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"
+         aria-hidden="true">
+      <!-- Wake spray at top (rear of boat) -->
+      <rect x="6"  y="0" width="2" height="2" fill="currentColor"/>
+      <rect x="12" y="0" width="2" height="2" fill="currentColor"/>
+      <rect x="18" y="0" width="2" height="2" fill="currentColor"/>
+      <rect x="24" y="0" width="2" height="2" fill="currentColor"/>
+      <rect x="9"  y="2" width="2" height="2" fill="currentColor"/>
+      <rect x="21" y="2" width="2" height="2" fill="currentColor"/>
+      <!-- Stern (square back) -->
+      <rect x="4"  y="6" width="24" height="3" fill="currentColor"/>
+      <!-- Main hull -->
+      <rect x="3"  y="9"  width="26" height="8" fill="currentColor"/>
+      <!-- Bridge / windscreen highlight -->
+      <rect x="9"  y="11" width="14" height="3" fill="#c5bda0"/>
+      <!-- Lower hull -->
+      <rect x="3"  y="17" width="26" height="6" fill="currentColor"/>
+      <!-- Hull tapering toward bow -->
+      <rect x="5"  y="23" width="22" height="3" fill="currentColor"/>
+      <rect x="7"  y="26" width="18" height="3" fill="currentColor"/>
+      <rect x="10" y="29" width="12" height="2" fill="currentColor"/>
+      <rect x="12" y="31" width="8"  height="2" fill="currentColor"/>
+      <rect x="14" y="33" width="4"  height="3" fill="currentColor"/>
+      <rect x="15" y="36" width="2"  height="2" fill="currentColor"/>
+    </svg>`;
+
+  const SVG_SHAHED = `
+    <svg class="sprite-svg s-shahed" viewBox="0 0 44 36"
+         xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"
+         aria-hidden="true">
+      <!-- Tail at top (rear) with prop hub -->
+      <rect x="20" y="0" width="4" height="2" fill="currentColor"/>
+      <rect x="14" y="2" width="16" height="2" fill="currentColor"/>
+      <!-- Body cylinder -->
+      <rect x="20" y="4"  width="4" height="20" fill="currentColor"/>
+      <rect x="18" y="6"  width="8" height="12" fill="currentColor"/>
+      <!-- Delta wing (sweeping back) -->
+      <rect x="0"  y="12" width="44" height="2" fill="currentColor"/>
+      <rect x="2"  y="14" width="40" height="2" fill="currentColor"/>
+      <rect x="6"  y="16" width="32" height="2" fill="currentColor"/>
+      <rect x="10" y="18" width="24" height="2" fill="currentColor"/>
+      <!-- Trailing wingtips (small fins) -->
+      <rect x="2"  y="10" width="3" height="2" fill="currentColor"/>
+      <rect x="39" y="10" width="3" height="2" fill="currentColor"/>
+      <!-- Pointed nose -->
+      <rect x="18" y="24" width="8" height="2" fill="currentColor"/>
+      <rect x="19" y="26" width="6" height="2" fill="currentColor"/>
+      <rect x="20" y="28" width="4" height="2" fill="currentColor"/>
+      <rect x="21" y="30" width="2" height="2" fill="currentColor"/>
+      <rect x="21" y="32" width="2" height="2" fill="currentColor"/>
+    </svg>`;
+
+  const SVG_MISSILE = `
+    <svg class="sprite-svg s-missile" viewBox="0 0 18 44"
+         xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"
+         aria-hidden="true">
+      <!-- Exhaust flame at the very top (rear) -->
+      <rect x="7" y="0" width="4" height="2" fill="currentColor"/>
+      <rect x="6" y="2" width="6" height="2" fill="currentColor"/>
+      <rect x="5" y="4" width="2" height="2" fill="currentColor"/>
+      <rect x="11" y="4" width="2" height="2" fill="currentColor"/>
+      <!-- Tail fins -->
+      <rect x="0"  y="6"  width="3" height="6" fill="currentColor"/>
+      <rect x="15" y="6"  width="3" height="6" fill="currentColor"/>
+      <rect x="6"  y="6"  width="6" height="3" fill="currentColor"/>
+      <!-- Main body cylinder -->
+      <rect x="6"  y="9"  width="6" height="26" fill="currentColor"/>
+      <!-- Body marker stripes (subtle pixel-art detail) -->
+      <rect x="5"  y="14" width="8" height="1" fill="#c5bda0"/>
+      <rect x="5"  y="22" width="8" height="1" fill="#c5bda0"/>
+      <!-- Pointed warhead nose -->
+      <rect x="5"  y="35" width="8" height="2" fill="currentColor"/>
+      <rect x="6"  y="37" width="6" height="2" fill="currentColor"/>
+      <rect x="7"  y="39" width="4" height="2" fill="currentColor"/>
+      <rect x="8"  y="41" width="2" height="3" fill="currentColor"/>
+    </svg>`;
+
+  const SVG_BY_TYPE = {
+    speedboat: SVG_SPEEDBOAT,
+    shahed:    SVG_SHAHED,
+    missile:   SVG_MISSILE,
+  };
+
   function paintDestroyer(r, l) {
     const s = cells[r][l];
-    s.innerHTML = `<div class="destroyer">
-      <div class="mast"></div><div class="tower"></div>
-      <div class="deck"></div><div class="gun"></div>
-      <div class="flag"></div><div class="hull"></div>
-    </div>`;
+    s.innerHTML = SVG_DESTROYER;
     s.classList.add('on');
   }
   function paintThreat(r, l, type) {
     const s = cells[r][l];
-    let html = '';
-    if (type === 'speedboat') html = `<div class="speedboat"><div class="cabin"></div><div class="hull2"></div><div class="wake"></div></div>`;
-    else if (type === 'shahed') html = `<div class="shahed"><div class="wing"></div><div class="body"></div><div class="tail"></div><div class="prop"></div></div>`;
-    else if (type === 'missile') html = `<div class="missile"><div class="flame"></div><div class="fin1"></div><div class="fin2"></div><div class="body"></div><div class="nose"></div></div>`;
-    s.innerHTML = html;
+    s.innerHTML = SVG_BY_TYPE[type] || '';
     s.classList.add('on');
   }
   function paintBullet(r, l) {
@@ -1034,11 +1100,14 @@
   }
 
   // Money / Trump-mode constants
-  const MONEY_MAX        = 50_000_000;
+  const MONEY_MAX        = 100_000_000;
   const MONEY_PER_SECOND = 2_500_000;
   const COST_BY_LANE     = [150_000, 450_000, 12_000_000]; // boat / Shahed / missile
   const WEAPON_BY_LANE   = ['HELLFIRE', 'AIM-9X', 'SM-3'];
   const COST_LABEL       = ['-$150K', '-$450K', '-$12M'];
+  // Minimum number of ticks between two missile spawns — kills the
+  // double/triple-SM-3 streaks that made the cagnotte impossible to defend.
+  const MISSILE_COOLDOWN_TICKS = 14;
 
   let state;
   function freshState(mode='A') {
@@ -1062,10 +1131,11 @@
       nextId: 1,
       lastFire: 0,
       flashes: [],
-      // Cagnotte ($200M start), depleted by every shot, refilled by Trump
+      // Cagnotte (depleted by every shot, refilled by Trump-mode)
       money: MONEY_MAX,
       inTrumpMode: false,
       moneyTimer: null,
+      lastMissileTick: -999,
     };
   }
   state = freshState();
@@ -1168,6 +1238,13 @@
     else if (state.score < 100) type = r < 0.50 ? 'BOAT' : (r < 0.92 ? 'SHAHED' : 'MISSILE'); // 50/42/8
     else                        type = r < 0.40 ? 'BOAT' : (r < 0.85 ? 'SHAHED' : 'MISSILE'); // 40/45/15
 
+    // Missile cooldown: never spawn two SM-3-bound missiles back-to-back —
+    // forces a breathing window so the player can rebuild the cagnotte
+    // before facing another $12M decision.
+    if (type === 'MISSILE' && state.tick - state.lastMissileTick < MISSILE_COOLDOWN_TICKS) {
+      type = 'SHAHED'; // downgrade to a cheaper threat
+    }
+
     // Each threat type is dedicated to its own lane (visible to the player so
     // they know what every shot will cost before pulling the trigger):
     //   Lane 0 = Speedboats         ($150K/shot)
@@ -1177,6 +1254,7 @@
     const startRow = 0;
     if (state.threats.some(t => t.lane === lane && Math.abs(t.row - startRow) < 2)) return;
 
+    if (type === 'MISSILE') state.lastMissileTick = state.tick;
     state.threats.push({ id: state.nextId++, type, lane, row: startRow, progress: 0 });
   }
 
