@@ -398,6 +398,88 @@
   }
   .miss-x.on { color: var(--lcd-on); }
 
+  /* ========= MONEY GAUGE (the "cagnotte" — $200M starting bankroll) ========= */
+  .money-amount {
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+    font-size: 13px;
+    color: var(--lcd-on);
+    letter-spacing: 0.5px;
+    line-height: 1;
+  }
+  .money-bar {
+    width: 100%;
+    max-width: 220px;
+    height: 6px;
+    margin: 2px auto 0;
+    background: rgba(26,26,26,0.18);
+    border: 1px solid rgba(26,26,26,0.55);
+    position: relative;
+  }
+  .money-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: var(--lcd-on);
+    transition: width 0.25s ease-out;
+  }
+  .money-bar-fill.low { animation: gaugeBlink 0.4s steps(2) infinite; }
+  @keyframes gaugeBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+  }
+  .money-flash {
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+    font-size: 9px;
+    line-height: 1.1;
+    color: var(--lcd-on);
+    letter-spacing: 1px;
+    margin-top: 2px;
+    min-height: 10px;
+  }
+
+  /* ========= TRUMP-MODE OVERLAY (shown in the left buffer) ========= */
+  .trump-mode {
+    position: absolute;
+    left: 4px;
+    top: 50px;     /* below status row */
+    bottom: 14px;  /* above start-prompt */
+    width: 21%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .trump-mode.active { display: flex; }
+  .trump-mode-img {
+    width: 88%;
+    max-width: 90px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor;
+    animation: trumpRage 0.22s steps(2) infinite;
+  }
+  .trump-mode .dollar {
+    position: absolute;
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+    font-size: 16px;
+    color: var(--lcd-on);
+    opacity: 0;
+    animation: dollarFloat 1.4s linear infinite;
+    text-shadow: 0 0 0 var(--lcd-on);
+  }
+  .trump-mode .d1 { left: 14%; bottom: 22%; animation-delay: 0s;    }
+  .trump-mode .d2 { left: 60%; bottom: 28%; animation-delay: 0.35s; }
+  .trump-mode .d3 { left: 30%; bottom: 16%; animation-delay: 0.7s;  }
+  .trump-mode .d4 { left: 70%; bottom: 18%; animation-delay: 1.05s; }
+  @keyframes dollarFloat {
+    0%   { transform: translateY(0) scale(0.5);  opacity: 0; }
+    15%  { opacity: 1; }
+    100% { transform: translateY(-90px) scale(1.2); opacity: 0; }
+  }
+
   .play-area {
     position: relative;
     height: calc(100% - 46px);
@@ -729,7 +811,11 @@
               <div>SCORE</div>
               <div id="score">000</div>
             </div>
-            <div class="center" id="alert">U.S. NAVY<br>STRAIT OF HORMUZ</div>
+            <div class="center">
+              <div class="money-amount" id="moneyAmount">$200,000,000</div>
+              <div class="money-bar"><div class="money-bar-fill" id="moneyBarFill"></div></div>
+              <div class="money-flash" id="alert">U.S. NAVY • STRAIT OF HORMUZ</div>
+            </div>
             <div class="right">
               <div>MISS</div>
               <div class="miss-row">
@@ -738,6 +824,17 @@
                 <div class="miss-x" id="miss3">✕</div>
               </div>
             </div>
+          </div>
+
+          <!-- Trump-mode visual: appears in the left buffer (over U.A.E. land)
+               when the player presses LEFT past lane 0. Trump is animated
+               and "prints" dollar bills that float upward. -->
+          <div class="trump-mode" id="trumpMode" aria-hidden="true">
+            <img class="trump-mode-img" src="assets/trump-angry.png" alt=""/>
+            <div class="dollar d1">$</div>
+            <div class="dollar d2">$</div>
+            <div class="dollar d3">$</div>
+            <div class="dollar d4">$</div>
           </div>
 
           <div class="play-area" id="playArea">
@@ -774,7 +871,7 @@
           </div>
 
           <div class="start-prompt" id="startPrompt">
-            ◀ ▶ MOVE &nbsp;•&nbsp; SPACE FIRE &nbsp;•&nbsp; PRESS GAME A
+            ◀ ▶ MOVE &nbsp;•&nbsp; SPACE FIRE &nbsp;•&nbsp; ◀◀ TRUMP TIME &nbsp;•&nbsp; PRESS GAME A
           </div>
           </div>
         </div>
@@ -906,6 +1003,11 @@
     s.classList.add('on');
   }
 
+  // Money / Trump-mode constants
+  const MONEY_MAX        = 200_000_000;
+  const MONEY_PER_SECOND = 100_000;
+  const COST_BY_LANE     = [150_000, 450_000, 12_000_000]; // boat / Shahed / missile
+
   let state;
   function freshState(mode='A') {
     return {
@@ -926,6 +1028,10 @@
       nextId: 1,
       lastFire: 0,
       flashes: [],
+      // Cagnotte ($200M start), depleted by every shot, refilled by Trump
+      money: MONEY_MAX,
+      inTrumpMode: false,
+      moneyTimer: null,
     };
   }
   state = freshState();
@@ -960,6 +1066,20 @@
     setTimeout(()=>beep(330,0.18,'square',0.16),200);
     setTimeout(()=>beep(220,0.36,'square',0.16),400);
   };
+  const sfxCash = () => {
+    beep(1800, 0.04, 'square', 0.10);
+    setTimeout(()=>beep(2400,0.05,'square',0.09),40);
+    setTimeout(()=>beep(2000,0.04,'square',0.07),100);
+  };
+
+  function formatMoney(n) {
+    // "$199,850,000" style — same length-ish as $200M
+    return '$' + Math.max(0, Math.floor(n)).toLocaleString('en-US');
+  }
+
+  const moneyEl     = document.getElementById('moneyAmount');
+  const moneyBarEl  = document.getElementById('moneyBarFill');
+  const trumpModeEl = document.getElementById('trumpMode');
 
   function render() {
     for (let r = 0; r < ROWS; r++) for (let l = 0; l < LANES; l++) clearCell(r, l);
@@ -977,6 +1097,15 @@
     paintDestroyer(PLAYER_ROW, state.playerLane);
     scoreEl.textContent = String(state.score).padStart(3, '0');
     missEls.forEach((el, i) => el.classList.toggle('on', i < state.misses));
+
+    // Cagnotte HUD
+    if (moneyEl)    moneyEl.textContent = formatMoney(state.money);
+    if (moneyBarEl) {
+      const pct = Math.max(0, state.money / MONEY_MAX) * 100;
+      moneyBarEl.style.width = pct + '%';
+      moneyBarEl.classList.toggle('low', pct < 20);
+    }
+    if (trumpModeEl) trumpModeEl.classList.toggle('active', state.inTrumpMode);
   }
 
   function spawn() {
@@ -987,19 +1116,13 @@
     else if (state.score < 100) type = r < 0.5 ? 'BOAT' : (r < 0.85 ? 'SHAHED' : 'MISSILE');
     else                        type = r < 0.35 ? 'BOAT' : (r < 0.7 ? 'SHAHED' : 'MISSILE');
 
-    // Spawn origin matches the silk-screened Hormuz map:
-    //  • Missiles & Shahed drones launch from Iranian land (top-right block) →
-    //      lanes 1 or 2, row 0 (where Iran is painted on the LCD).
-    //  • Boats sail in from the strait — top-left water only → lane 0, row 0.
-    let lane, startRow;
-    if (type === 'BOAT') {
-      lane = 0;
-      startRow = 0;
-    } else {
-      lane = 1 + Math.floor(Math.random() * 2);
-      startRow = 0;
-    }
-    // Avoid stacking with anything already close in the same lane.
+    // Each threat type is dedicated to its own lane (visible to the player so
+    // they know what every shot will cost before pulling the trigger):
+    //   Lane 0 = Speedboats         ($150K/shot)
+    //   Lane 1 = Shahed drones      ($450K/shot)
+    //   Lane 2 = Long-range missiles ($12M/shot)
+    const lane = type === 'BOAT' ? 0 : (type === 'SHAHED' ? 1 : 2);
+    const startRow = 0;
     if (state.threats.some(t => t.lane === lane && Math.abs(t.row - startRow) < 2)) return;
 
     state.threats.push({ id: state.nextId++, type, lane, row: startRow, progress: 0 });
@@ -1102,7 +1225,7 @@
     alertEl.innerHTML = msg;
     clearTimeout(flashAlert._t);
     flashAlert._t = setTimeout(() => {
-      alertEl.innerHTML = "U.S. NAVY<br>STRAIT OF HORMUZ";
+      alertEl.innerHTML = "U.S. NAVY • STRAIT OF HORMUZ";
     }, 700);
   }
 
@@ -1116,6 +1239,7 @@
     ensureAudio();
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     if (state.timer) clearTimeout(state.timer);
+    if (state.moneyTimer) { clearInterval(state.moneyTimer); state.moneyTimer = null; }
     state = freshState(mode);
     state.running = true;
     banner.classList.remove('show');
@@ -1126,22 +1250,84 @@
     state.timer = setTimeout(loop, 600);
   }
 
-  function gameOver(shipDestroyed=false) {
+  function gameOver(shipDestroyed=false, bankrupted=false) {
     state.running = false;
     if (state.timer) clearTimeout(state.timer);
+    if (state.moneyTimer) { clearInterval(state.moneyTimer); state.moneyTimer = null; }
+    state.inTrumpMode = false;
     sfxOver();
-    bannerTitle.textContent = shipDestroyed ? 'SHIP SUNK' : 'GAME OVER';
+    bannerTitle.textContent = bankrupted ? 'BANKRUPT' : (shipDestroyed ? 'SHIP SUNK' : 'GAME OVER');
     bannerSub.textContent = `SCORE ${String(state.score).padStart(3,'0')} — PRESS GAME A`;
     banner.classList.add('show');
   }
 
-  function moveLeft()  { if (!state.running) return; if (state.playerLane > 0) { state.playerLane--; sfxMove(); render(); } }
-  function moveRight() { if (!state.running) return; if (state.playerLane < LANES - 1) { state.playerLane++; sfxMove(); render(); } }
+  // ============================================================
+  // Movement, fire, and Trump-mode handling
+  // ============================================================
+  function moveLeft() {
+    if (!state.running) return;
+    if (state.inTrumpMode) return; // already at the leftmost "Trump" position
+    if (state.playerLane > 0) {
+      state.playerLane--;
+      sfxMove();
+      render();
+    } else {
+      // Already at lane 0 — pressing LEFT once more enters Trump-mode (4th
+      // position, on the U.A.E. land area). The destroyer stays put while
+      // Trump appears on the side and starts printing money ($100K/sec).
+      enterTrumpMode();
+    }
+  }
+  function moveRight() {
+    if (!state.running) return;
+    if (state.inTrumpMode) {
+      exitTrumpMode();
+      return;
+    }
+    if (state.playerLane < LANES - 1) {
+      state.playerLane++;
+      sfxMove();
+      render();
+    }
+  }
+  function enterTrumpMode() {
+    if (state.inTrumpMode) return;
+    state.inTrumpMode = true;
+    sfxCash();
+    flashAlert('TRUMP TIME');
+    state.moneyTimer = setInterval(() => {
+      if (!state.running || state.paused || !state.inTrumpMode) return;
+      state.money = Math.min(MONEY_MAX, state.money + MONEY_PER_SECOND);
+      sfxCash();
+      render();
+    }, 1000);
+    render();
+  }
+  function exitTrumpMode() {
+    if (!state.inTrumpMode) return;
+    state.inTrumpMode = false;
+    if (state.moneyTimer) { clearInterval(state.moneyTimer); state.moneyTimer = null; }
+    sfxMove();
+    render();
+  }
+
   function fire() {
     if (!state.running) return;
+    if (state.inTrumpMode) return; // can't fire while Trump is busy printing money
     const now = performance.now();
     if (now - state.lastFire < FIRE_COOLDOWN_MS) return;
     state.lastFire = now;
+
+    // Each shot drains the cagnotte. Cost depends on the lane being defended.
+    const cost = COST_BY_LANE[state.playerLane];
+    state.money -= cost;
+    if (state.money <= 0) {
+      state.money = 0;
+      render();
+      gameOver(false, true); // bankrupted → game over
+      return;
+    }
+
     state.bullets.push({ id: state.nextId++, lane: state.playerLane, row: PLAYER_ROW - 1 });
     sfxFire();
     render();
